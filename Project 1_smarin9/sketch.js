@@ -5,7 +5,7 @@ var score = 0;
 var time = 30;
 var s = 0;
 var startTime = 0;
-var dead = true;
+var bool = true;
 var moving = 0;
 var state = 0;
 
@@ -15,7 +15,7 @@ function preload()
         //Preloads the bug spritesheet
       	for (var i = 0; i < count; i++)
       	{
-      		bug[i] = new BugCrawler("Bugs.png", random(560) + 40, random(400) +20, random([-1, +1]), dead);
+      		bug[i] = new BugCrawler("Bugs.png", random(560) + 40, random(400) +20, random([-1, +1]), bool);
       	}
 }
 
@@ -38,7 +38,7 @@ function mousePressed()
   //Squishes the bug when the user clicks on a bug
   for (var i = 0; i < count; i++)
   {
-    bug[i].squish(mouseX, mouseY);
+    bug[i].crush(mouseX, mouseY);
   }
 }
 
@@ -70,7 +70,7 @@ function draw()
             if(mouseX >= 230 && mouseX <= 330 && mouseY >= 200 && mouseY <=250 && mouseClick == true)
             {
               state = 1;
-              startTime = second();
+              startTime = second(30);
             }
         }
 
@@ -96,7 +96,7 @@ function draw()
         }
 
         //Game Over Screen
-        else if (state == 2)
+        if (state == 2)
         {
           fill(255, 255, 255);
           textSize(50);
@@ -104,19 +104,22 @@ function draw()
           text("GAME OVER", 150, 100);
           textSize(25);
           text("You squished " + score + " bugs!", 190, 150);
-          text("Try Again!", 250, 230);
-          fill(0, 0, 150, 50);
-          ellipse(304, 220, 150, 50);
-          if (mouseX >= 230 && mouseX <= 330 && mouseY >= 200 && mouseY <=250 && mouseClick == true)
-          {
-            state = 1;
-            startTime = second();
-          }
+          text("Refresh to try again!", 202, 200);
         }
+
+        //Win Screen - The user squished the maximum amount of bugs
+        if (score == 40)
+        {
+          state = 3;
+          if (state == 3){
+           text("You squished all 40 bugs!", 180, 200);
+           text("Refresh to play again!", 202, 240);}
+        }
+
         clicked();
 }
 
-function BugCrawler(imageName, x, y, moving, dead)
+function BugCrawler(imageName, x, y, moving, bool)
 {
 	this.spritesheet = loadImage(imageName);
 	this.frame = 0;
@@ -124,7 +127,7 @@ function BugCrawler(imageName, x, y, moving, dead)
 	this.y = y;
 	this.moving = moving;
 	this.facing = moving;
-	this.dead = dead;
+	this.bool = bool;
 
 	this.draw = function() 
 	{
@@ -135,7 +138,7 @@ function BugCrawler(imageName, x, y, moving, dead)
 		  {
 		  	scale(-1.0, 1.0);
 		  }
-      if(this.dead == true)
+      if(this.bool == true)
       {
 
           		  if (this.moving == 0)
@@ -162,7 +165,7 @@ function BugCrawler(imageName, x, y, moving, dead)
             		 	 image(this.spritesheet, 0, 0, 80, 80, 640, 0, 80, 80);
                 
                   //Increases the speed of the bugs as the user's score gets higher
-            		  if (frameCount % 4 == 0)
+            		  if (frameCount % 3 == 0)
                   {
                     			   this.frame = (this.frame + 1) % 8;
                     			   this.x = this.x + 6 * this.moving;
@@ -174,20 +177,6 @@ function BugCrawler(imageName, x, y, moving, dead)
             		  }
 
                   if (score >= 5)
-                  {
-                     if (frameCount % 3 == 0)
-                  {
-                             this.frame = (this.frame + 1) % 8;
-                             this.x = this.x + 6 * this.moving;
-                             if(this.x < 40 || this.x > width - 40)
-                             {
-                                    this.moving = -this.moving
-                                    this.facing = -this.facing
-                             }
-                  }
-                  }
-
-                  if (score >= 10)
                   {
                      if (frameCount % 2 == 0)
                   {
@@ -201,9 +190,23 @@ function BugCrawler(imageName, x, y, moving, dead)
                   }
                   }
 
-                  if (score >= 15)
+                  if (score >= 10)
                   {
                      if (frameCount % 1 == 0)
+                  {
+                             this.frame = (this.frame + 1) % 8;
+                             this.x = this.x + 6 * this.moving;
+                             if(this.x < 40 || this.x > width - 40)
+                             {
+                                    this.moving = -this.moving
+                                    this.facing = -this.facing
+                             }
+                  }
+                  }
+
+                  if (score >= 15)
+                  {
+                     if (frameCount % -1 == 0)
                   {
                              this.frame = (this.frame + 1) % 8;
                              this.x = this.x + 6 * this.moving;
@@ -235,10 +238,10 @@ function BugCrawler(imageName, x, y, moving, dead)
 		this.facing = direction;
 	}
 
-  this.squish = function(x, y)
+  this.crush = function(x, y)
   {
 
-    //Squishes the bugs as the user clicks on top of a bug. After each bug is squished, the User's
+    //Crushes the bugs as the user clicks on top of a bug. After each bug is squished, the User's
     //score increases.
     if (this.x -40 < x && x < this.x + 40 && this.y -40 < y && y < this.y + 40)
     {
@@ -247,11 +250,11 @@ function BugCrawler(imageName, x, y, moving, dead)
       this.mouseY = y;
       this.initialX = this.x;
       this.initialY = this.y;
-      if (this.dead == true)
+      if (this.bool == true)
       {
         score++;
       }
-      this.dead = false;
+      this.bool = false;
     }
   }
 
